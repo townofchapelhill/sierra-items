@@ -54,7 +54,7 @@ def update_items(writer):
 print(str(now))
 
 # open a csv file for writing
-items = open('overdue_items.csv', 'w')
+items = open('//CHFS/Shared Documents/OpenData/datasets/staging/department/overdue_items.csv', 'w')
 
 # create a csvwriter object
 csvwriter = csv.writer(items)

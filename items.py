@@ -7,6 +7,10 @@ import secrets
 
 now = datetime.datetime.now()
 
+# function checks if a string is an ASCII (english characters only)
+def is_ascii(s):
+	return all(ord(c) < 128 for c in s)
+
 # function that gets the authentication token
 def get_token():
     url = "https://catalog.chapelhillpubliclibrary.org/iii/sierra-api/v3/token"
@@ -38,7 +42,11 @@ def update_items(writer):
         for entry in jfile["entries"]:
             row = []
             try:
-                # print(entry)
+                callNum = entry["callNumber"]
+                if is_ascii(callNum) == False:
+                    for letter in callNum:
+                        if is_ascii(letter) == False:
+                            callNum = callNum.replace(letter, '?')
                 row.append(entry["id"])
                 row.append(entry["bibIds"][0])
                 row.append(entry["status"]["display"])
@@ -49,7 +57,7 @@ def update_items(writer):
         
         id = int(jfile["entries"][-1]["id"]) + 1
         
-        print(id)
+        # print(id)
 
 print(str(now))
 

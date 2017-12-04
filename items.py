@@ -62,7 +62,7 @@ def update_items(writer):
 print(str(now))
 
 # open a csv file for writing
-items = open('//CHFS/Shared Documents/OpenData/datasets/staging/items.csv', 'w')
+items = open('//CHFS/Shared Documents/OpenData/datasets/prestaging/items.csv', 'w')
 
 # create a csvwriter object
 csvwriter = csv.writer(items)

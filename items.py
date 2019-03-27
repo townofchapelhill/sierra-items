@@ -25,11 +25,11 @@ def update_items(writer):
     # loop through each URI, incrementing by the limit of 2,000 until all item data accessed
     i = 0
     token = get_token()
-    id = 100005
+    item_id = 100005
     
     while True:
         
-        url = "https://catalog.chapelhillpubliclibrary.org/iii/sierra-api/v3/items?limit=2000&deleted=false&fields=id,bibIds,status,callNumber&id=["+str(id)+",]"
+        url = "https://catalog.chapelhillpubliclibrary.org/iii/sierra-api/v5/items?limit=2000&deleted=false&fields=id,bibIds,status,callNumber,location,status,itemType,fixedFields&id=[" + str(item_id) + ",]"
         request = requests.get(url, headers={
                     "Authorization": "Bearer " + get_token()
                 })
@@ -48,27 +48,31 @@ def update_items(writer):
                         if is_ascii(letter) == False:
                             callNum = callNum.replace(letter, '?')
                 row.append(entry["id"])
-                row.append(entry["bibIds"][0])
                 row.append(entry["status"]["display"])
+                row.append(entry["location"]["name"])
+                row.append(entry["itemType"])
+                row.append(entry["fixedFields"]["76"]["value"])
+                row.append(entry["fixedFields"]["77"]["value"])
                 row.append(entry["callNumber"])
+                row.append(entry["bibIds"][0])
                 writer.writerow(row)
             except KeyError:
                 continue
         
-        id = int(jfile["entries"][-1]["id"]) + 1
+        item_id = int(jfile["entries"][-1]["id"]) + 1
         
-        # print(id)
+        print(item_id)
 
 print(str(now))
 
 # open a csv file for writing
-items = open('//CHFS/Shared Documents/OpenData/datasets/prestaging/items.csv', 'w')
+items = open('items.csv', 'w')
 
 # create a csvwriter object
 csvwriter = csv.writer(items)
 
 # write a header & call the create_csv function
-csvwriter.writerow(['id','BibIds','Status','Call Number'])
+csvwriter.writerow(['id','Status', 'Collection', 'Item Type', 'Total Checkouts', 'Total Renewals', 'Call Number', 'BibIds'])
 update_items(csvwriter)
 
 # close file

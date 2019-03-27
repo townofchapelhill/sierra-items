@@ -14,6 +14,7 @@ def get_token():
     header = {"Authorization": "Basic " + str(secrets.sierra_api), "Content-Type": "application/x-www-form-urlencoded"}
     response = requests.post(url, headers=header)
     json_response = json.loads(response.text)
+    print(json_response)
     token = json_response["access_token"]
     return token
     
@@ -54,14 +55,15 @@ def update_items(writer):
 print(str(now))
 
 # open a csv file for writing
-items = open('//CHFS/Shared Documents/OpenData/datasets/staging/overdue_items.csv', 'w')
+items = open('overdue_items.csv', 'w')
 
 # create a csvwriter object
 csvwriter = csv.writer(items)
 
 # write a header & call the create_csv function
 csvwriter.writerow(['id','Status','Due Date'])
-update_items(csvwriter)
+# update_items(csvwriter)
+get_token()
 
 # close file
 items.close()

@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-secrets.py
-secrets2.py
-=======
 # Compiled source #
 ###################
 *.com
@@ -49,4 +45,3 @@ temp*.sh
 *secret*
 *credential*
 *.lock
->>>>>>> 938b7130cc5b101692f311be82a5a200cdc9b933

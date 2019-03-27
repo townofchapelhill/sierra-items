@@ -135,7 +135,6 @@ def combine_data(items, titles):
     incomplete_data = []
     count = 0
     for title in titles:
-        print(title['title'])
         for item in items:
             if int(item['bibId']) == int(title['bibId']):
                 count += 1

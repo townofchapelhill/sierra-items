@@ -6,6 +6,7 @@
 import requests
 import csv
 import json
+import datetime
 import secrets, filename_secrets
 
 # authenticate to the Sierra API
@@ -63,6 +64,8 @@ def get_item_record(itemURL):
 # retrieve fine record and associated data, write to csv
 def get_fine_records(outputFile):
     global sierraToken
+    last_year = datetime.datetime.now() - datetime.timedelta(weeks= 52)
+    query_date = "[" + last_year.isoformat().split('T')[0] + ",]"
     i = 0
     header = {"Authorization": "Bearer " + sierraToken}
     outputRecord = {'materialType': '', 'pType': 0, 'chargeType': '', 'itemCharge': 0.0, 'processingFee': 0.0, 'billingFee': 0.0, 'paidAmount': 0.0, 'assessedDate': ''}
@@ -71,7 +74,7 @@ def get_fine_records(outputFile):
       writer = csv.DictWriter(csvfile, fieldnames=fieldNames)
       writer.writeheader()
       while True:
-        fineURL = "https://catalog.chapelhillpubliclibrary.org:443/iii/sierra-api/v5/fines/?limit=200&offset=" + str(i)
+        fineURL = "https://catalog.chapelhillpubliclibrary.org:443/iii/sierra-api/v5/fines/?limit=200&offset=" + str(i) + "&assessedDate=" + query_date
         response = requests.get(fineURL, headers=header)
         if response.status_code != 200:
             print(f'fine retrieval failed for {fineURL} with response code:{response.status_code} ')

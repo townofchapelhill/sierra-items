@@ -1,12 +1,15 @@
 #  Via the Sierra API, extract fines data
 #    link to the patron for classification data
 #    link to the item and bib records
-#    
+#  You can limit by dates - see commented code below
+#  An offset of the start record can be accomplished by setting the initial value of 'i'
 
 import requests
 import csv
 import json
-import datetime
+import os
+import pathlib
+# import datetime
 import secrets, filename_secrets
 
 # authenticate to the Sierra API
@@ -64,23 +67,32 @@ def get_item_record(itemURL):
 # retrieve fine record and associated data, write to csv
 def get_fine_records(outputFile):
     global sierraToken
-    last_year = datetime.datetime.now() - datetime.timedelta(weeks= 52)
-    query_date = "[" + last_year.isoformat().split('T')[0] + ",]"
+    # last_year = datetime.datetime.now() - datetime.timedelta(weeks= 52)
+    # query_date = "[" + last_year.isoformat().split('T')[0] + ",]"
+    # changing the initial value of 'i' alters the start record retrieved
     i = 0
     header = {"Authorization": "Bearer " + sierraToken}
-    outputRecord = {'materialType': '', 'pType': 0, 'chargeType': '', 'itemCharge': 0.0, 'processingFee': 0.0, 'billingFee': 0.0, 'paidAmount': 0.0, 'assessedDate': ''}
+    outputRecord = {'fine_id': '', 'materialType': '', 'pType': 0, 'chargeType': '', 'itemCharge': 0.0, 'processingFee': 0.0, 'billingFee': 0.0, 'paidAmount': 0.0, 'assessedDate': ''}
     fieldNames = outputRecord.keys()
-    with open(outputFile, 'w') as csvfile:
-      writer = csv.DictWriter(csvfile, fieldnames=fieldNames)
-      writer.writeheader()
+    with open(outputFile, 'a') as csvfile:
+      if os.stat(outputFile).st_size == 0:
+          # write the header if the file is empty
+          writer = csv.DictWriter(csvfile, fieldnames=fieldNames)
+          writer.writeheader()
       while True:
-        fineURL = "https://catalog.chapelhillpubliclibrary.org:443/iii/sierra-api/v5/fines/?limit=200&offset=" + str(i) + "&assessedDate=" + query_date
+        fineURL = "https://catalog.chapelhillpubliclibrary.org:443/iii/sierra-api/v5/fines/?limit=50&offset=" + str(i)
+        # add a time span to the query - requires 'query_date' lines above to be uncommented
+        #fineURL = "https://catalog.chapelhillpubliclibrary.org:443/iii/sierra-api/v5/fines/?limit=50&offset=" + str(i) + "&assessedDate=" + query_date
         response = requests.get(fineURL, headers=header)
         if response.status_code != 200:
             print(f'fine retrieval failed for {fineURL} with response code:{response.status_code} ')
-            # how do I terminate the while loop?
+            #terminate the while loop
+            break
         else:
             finesRetrieved = json.loads(response.text)
+            if finesRetrieved["total"] == 0:
+                print(f'No records retrieved: {finesRetrieved["total"]}')
+                break
             for fineRecord in finesRetrieved["entries"]:
                 outputRecord = {}
                 patronURL = fineRecord["patron"]
@@ -89,6 +101,7 @@ def get_fine_records(outputFile):
                     outputRecord['materialType'] = get_item_record(itemURL)
                 else:
                     outputRecord['materialType'] = "none"
+                outputRecord['fine_id'] = fineRecord['id']   
                 outputRecord['pType'] = get_patron_record(patronURL)
                 outputRecord['chargeType'] = fineRecord["chargeType"]["display"]
                 outputRecord['itemCharge'] = fineRecord["itemCharge"]
@@ -97,8 +110,8 @@ def get_fine_records(outputFile):
                 outputRecord['paidAmount'] = fineRecord["paidAmount"]
                 outputRecord['assessedDate'] = fineRecord["assessedDate"].split('T')[0]
                 writer.writerow(outputRecord)
-        i += 200
-        print(f'Fine records processed: {i}')
+        i += 50
+        # print(f'Fine records processed: {i}')
         # refresh the access token
         sierraToken = get_token()
     csvfile.close()
@@ -107,6 +120,6 @@ def get_fine_records(outputFile):
 if __name__ == '__main__':
     # get Sierra access token
     sierraToken = get_token()
-    outputFile = "data/fines.csv"
+    outputFile = pathlib.Path(filename_secrets.productionStaging).joinpath("fines.csv")
     get_fine_records(outputFile)
     exit

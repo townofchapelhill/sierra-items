@@ -19,7 +19,7 @@ def get_token():
     header = {"Authorization": "Basic " + str(secrets.sierra_api), "Content-Type": "application/x-www-form-urlencoded"}
     response = requests.post(url, headers=header)
     if response.status_code != 200:
-        print(f'get Sierra Token failed with code {response.status_code} ')
+        print(f'get Sierra Token failed with code {response.status_code}')
         exit(1)
     json_response = json.loads(response.text)
     return json_response["access_token"]
@@ -75,9 +75,9 @@ def get_fine_records(outputFile):
     outputRecord = {'fine_id': '', 'materialType': '', 'pType': 0, 'chargeType': '', 'itemCharge': 0.0, 'processingFee': 0.0, 'billingFee': 0.0, 'paidAmount': 0.0, 'assessedDate': ''}
     fieldNames = outputRecord.keys()
     with open(outputFile, 'a') as csvfile:
+      writer = csv.DictWriter(csvfile, fieldnames=fieldNames)
       if os.stat(outputFile).st_size == 0:
           # write the header if the file is empty
-          writer = csv.DictWriter(csvfile, fieldnames=fieldNames)
           writer.writeheader()
       while True:
         fineURL = "https://catalog.chapelhillpubliclibrary.org:443/iii/sierra-api/v5/fines/?limit=50&offset=" + str(i)

@@ -70,7 +70,7 @@ def get_fine_records(outputFile):
     # last_year = datetime.datetime.now() - datetime.timedelta(weeks= 52)
     # query_date = "[" + last_year.isoformat().split('T')[0] + ",]"
     # changing the initial value of 'i' alters the start record retrieved
-    i = 0
+    i = 55100
     header = {"Authorization": "Bearer " + sierraToken}
     outputRecord = {'fine_id': '', 'materialType': '', 'pType': 0, 'chargeType': '', 'itemCharge': 0.0, 'processingFee': 0.0, 'billingFee': 0.0, 'paidAmount': 0.0, 'assessedDate': ''}
     fieldNames = outputRecord.keys()
